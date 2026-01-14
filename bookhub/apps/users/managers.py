@@ -1,11 +1,17 @@
+# apps/users/managers.py - исправленная версия
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import gettext_lazy as _
 
 
 class UserManager(BaseUserManager):
-    """Кастомный менеджер для модели User"""
+    """
+    Кастомный менеджер для модели User.
+    """
 
     def create_user(self, email, username, password=None, **extra_fields):
+        """
+        Создает и сохраняет пользователя с email, username и паролем.
+        """
         if not email:
             raise ValueError(_('The Email must be set'))
         if not username:
@@ -15,8 +21,7 @@ class UserManager(BaseUserManager):
         user = self.model(email=email, username=username, **extra_fields)
 
         if password:
-            from .models import User
-            user.password = User.hash_password(password)
+            user.set_password(password)
         else:
             user.set_unusable_password()
 
@@ -24,6 +29,9 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, username, password=None, **extra_fields):
+        """
+        Создает и сохраняет суперпользователя.
+        """
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)

@@ -1,10 +1,8 @@
-# apps/users/models.py
+# # apps/users/models.py
 import uuid
 import jwt
-import bcrypt
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
-
-
+from django.contrib.auth.hashers import make_password, check_password
 from datetime import datetime, timedelta
 from django.conf import settings
 from django.db import models
@@ -13,15 +11,17 @@ from apps.core.models import BaseModel
 
 
 class User(AbstractBaseUser, PermissionsMixin, BaseModel):
-
-    email = models.EmailField(unique=True,verbose_name='Email адрес')
+    email = models.EmailField(unique=True, verbose_name='Email адрес')
     username = models.CharField(max_length=150, unique=True, verbose_name='Имя пользователя')
     first_name = models.CharField(max_length=150, blank=True, verbose_name='Имя')
-    last_name = models.CharField(max_length=150,blank=True,verbose_name='Фамилия')
-    is_active = models.BooleanField(default=True,verbose_name='Активен')
-    is_staff = models.BooleanField(default=False,verbose_name='Доступ к админке')
-    is_verified = models.BooleanField(default=False,verbose_name='Email подтвержден')
-    roles = models.ManyToManyField('authorization.Role', through='authorization.UserRole',
+    last_name = models.CharField(max_length=150, blank=True, verbose_name='Фамилия')
+    is_active = models.BooleanField(default=True, verbose_name='Активен')
+    is_staff = models.BooleanField(default=False, verbose_name='Доступ к админке')
+    is_verified = models.BooleanField(default=False, verbose_name='Email подтвержден')
+
+    roles = models.ManyToManyField(
+        'authorization.Role',
+        through='authorization.UserRole',
         related_name='users',
         verbose_name='Роли'
     )
@@ -50,7 +50,7 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModel):
     )
 
     # Для мягкого удаления (soft delete)
-    deleted_at = models.DateTimeField(null=True,blank=True,verbose_name='Дата удаления')
+    deleted_at = models.DateTimeField(null=True, blank=True, verbose_name='Дата удаления')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
@@ -65,28 +65,6 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModel):
 
     def __str__(self):
         return f'{self.email} ({self.username})'
-
-    def save(self, *args, **kwargs):
-        # Хешируем пароль при создании/изменении
-        if self.password and not self.password.startswith('$2b$'):
-            self.password = self.hash_password(self.password)
-        super().save(*args, **kwargs)
-
-    @staticmethod
-    def hash_password(password: str) -> str:
-        """Хеширование пароля с использованием bcrypt"""
-        salt = bcrypt.gensalt()
-        hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
-        return hashed.decode('utf-8')
-
-    def check_password(self, password: str) -> bool:
-        """Проверка пароля"""
-        if not self.password.startswith('$2b$'):
-            return False
-        return bcrypt.checkpw(
-            password.encode('utf-8'),
-            self.password.encode('utf-8')
-        )
 
     def create_jwt_token(self, token_type='access', **kwargs):
         """

@@ -1,28 +1,29 @@
-from django.contrib import admin
-from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
-from rest_framework import permissions
+from django.contrib import admin
 from django.http import JsonResponse
+from django.urls import include, path
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
 
 
-# Простой view для корневого URL
 def api_root(request):
-    return JsonResponse({
-        'message': 'Welcome to BookHub API',
-        'version': 'v1',
-        'endpoints': {
-            'authentication': '/api/auth/',
-            'products': '/api/products/',
-            'orders': '/api/orders/',
-            'users': '/api/users/',
-            'admin': '/admin/',
-            'swagger': '/swagger/',
-            'redoc': '/redoc/'
+    return JsonResponse(
+        {
+            "message": "Welcome to BookHub API",
+            "version": "v1",
+            "endpoints": {
+                "authentication": "/api/auth/",
+                "products": "/api/products/",
+                "orders": "/api/orders/",
+                "users": "/api/users/",
+                "admin": "/admin/",
+                "swagger": "/swagger/",
+                "redoc": "/redoc/",
+            },
         }
-    })
+    )
 
 
 schema_view = get_schema_view(
@@ -38,21 +39,21 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     # Корневой URL
-    path('', api_root, name='api-root'),
-
-    # Админка
-    path('admin/', admin.site.urls),
-    path('api/admin/permissions/', include('apps.authorization.urls')),
-
+    path("", api_root, name="api-root"),
+    # Админ
+    path("admin/", admin.site.urls),
+    path("api/admin/permissions/", include("apps.authorization.urls")),
     # Документация API
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-
-    path('api/auth/', include('apps.authentication.urls')),
-    path('api/products/', include('apps.products.urls')),
-    path('api/orders/', include('apps.orders.urls')),
-    path('api/users/', include('apps.users.urls')),
-
+    path(
+        "swagger/",
+        schema_view.with_ui("swagger", cache_timeout=0),
+        name="schema-swagger-ui",
+    ),
+    path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
+    path("api/auth/", include("apps.authentication.urls")),
+    path("api/products/", include("apps.products.urls")),
+    path("api/orders/", include("apps.orders.urls")),
+    path("api/users/", include("apps.users.urls")),
 ]
 
 if settings.DEBUG:

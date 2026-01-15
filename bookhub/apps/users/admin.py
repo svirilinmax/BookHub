@@ -7,25 +7,48 @@ from .models import User
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    """Админка для пользователей"""
+    """
+    Управление пользователей
+    """
 
-    list_display = ('email', 'username', 'first_name', 'last_name', 'is_staff', 'is_active')
-    list_filter = ('is_staff', 'is_active', 'is_verified')
-    search_fields = ('email', 'username', 'first_name', 'last_name')
-    ordering = ('email',)
+    list_display = (
+        "email",
+        "username",
+        "first_name",
+        "last_name",
+        "is_staff",
+        "is_active",
+    )
+    list_filter = ("is_staff", "is_active", "is_verified")
+    search_fields = ("email", "username", "first_name", "last_name")
+    ordering = ("email",)
 
     fieldsets = (
-        (None, {'fields': ('email', 'password')}),
-        (_('Personal info'), {'fields': ('username', 'first_name', 'last_name')}),
-        (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_verified', 'groups', 'user_permissions')}),
-        (_('Important dates'), {'fields': ('last_login', 'created_at', 'updated_at')}),
+        (None, {"fields": ("email", "password")}),
+        (_("Personal info"), {"fields": ("username", "first_name", "last_name")}),
+        (
+            _("Permissions"),
+            {
+                "fields": (
+                    "is_active",
+                    "is_staff",
+                    "is_verified",
+                    "groups",
+                    "user_permissions",
+                )
+            },
+        ),
+        (_("Important dates"), {"fields": ("last_login", "created_at", "updated_at")}),
     )
 
     add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('email', 'username', 'password1', 'password2'),
-        }),
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("email", "username", "password1", "password2"),
+            },
+        ),
     )
 
-    readonly_fields = ('last_login', 'created_at', 'updated_at')
+    readonly_fields = ("last_login", "created_at", "updated_at")

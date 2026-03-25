@@ -36,7 +36,7 @@ clean:
 	docker system prune -f
 
 reset: down clean build up
-	@echo "✅ Система перезапущена"
+	@echo "Система перезапущена"
 
 migrate:
 	docker-compose exec web python manage.py migrate

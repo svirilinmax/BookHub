@@ -1,12 +1,11 @@
 #!/bin/bash
-# setup.sh
 
 echo "Начинаем настройку проекта BookHub..."
 
 # Создаем виртуальное окружение
 echo "Создаем виртуальное окружение..."
 python3 -m venv venv
-source venv/bin/activate  # Было: source venb/bin/activate
+source venv/bin/activate
 
 # Устанавливаем зависимости
 echo "Устанавливаем зависимости..."

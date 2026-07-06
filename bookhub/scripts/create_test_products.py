@@ -15,11 +15,9 @@ def clear_existing_data():
     """Очистка существующих тестовых данных"""
     print("Очистка старых тестовых данных...")
 
-    # Удаляем только тестовые товары
     Product.objects.all().delete()
     print("Старые товары удалены")
 
-    # Удаляем только тестовые категории
     Category.objects.filter(
         name__in=[
             "Художественная литература",
@@ -47,7 +45,6 @@ def create_test_categories():
     created_categories = {}
 
     for slug, name, description in categories:
-        # Проверяем существование
         existing = Category.objects.filter(slug=slug).first()
         if not existing:
             category = Category.objects.create(
@@ -68,8 +65,6 @@ def create_test_products(categories):
     Создаем тестовые товары
     """
     print("\nСоздание товаров...")
-
-    # Получаем или создаем администратора
     admin, created = User.objects.get_or_create(
         email="admin@gmail.com",
         defaults={
@@ -180,20 +175,16 @@ def main():
     print("Создание тестовых данных для BookHub")
     print("=" * 50)
 
-    # Очищаем старые данные
     clear_existing_data()
 
-    # Создаем категории
     categories = create_test_categories()
 
-    # Создаем товары
     created_count = create_test_products(categories)
 
     print("\n" + "=" * 50)
     print("Тестовые данные созданы!")
     print(f"Итог: {created_count} новых товаров, {Category.objects.count()} категорий")
 
-    # Выводим список товаров
     print("\nДоступные товары:")
     for product in Product.objects.all():
         print(f"  • {product.title} - {product.author} ({product.price} руб.)")

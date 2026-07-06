@@ -35,7 +35,6 @@ class JWTAuthenticationMiddleware(MiddlewareMixin):
         """
         # Проверяем публичные маршруты
         if self._is_public_path(request.path, request.method):
-            # Для публичных маршрутов не требуется аутентификация
             return None
 
         return None
@@ -66,7 +65,6 @@ class JWTAuthenticationMiddleware(MiddlewareMixin):
         """
         Обработка ошибок аутентификации и авторизации
         """
-        # Обрабатываем только JSON ответы
         if response.get("Content-Type", "").startswith("application/json"):
             try:
                 if response.status_code == 401:

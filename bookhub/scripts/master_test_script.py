@@ -6,7 +6,6 @@ from datetime import datetime
 import django
 import requests
 
-# Настройка Django
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bookhub.settings")
 django.setup()

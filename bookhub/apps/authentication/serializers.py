@@ -30,13 +30,11 @@ class RegisterSerializer(serializers.ModelSerializer):
         }
 
     def validate_email(self, value):
-        # Проверка формата email
         try:
             validate_email(value)
         except DjangoValidationError:
             raise serializers.ValidationError(_("Invalid email format."))
 
-        # Проверка уникальности
         if User.objects.filter(email__iexact=value).exists():
             raise serializers.ValidationError(_("User with this email already exists."))
 

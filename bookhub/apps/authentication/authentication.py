@@ -14,17 +14,14 @@ class JWTAuthentication(BaseAuthentication):
     """
 
     def authenticate(self, request):
-        # Получаем заголовок Authorization
         auth_header = request.headers.get("Authorization", "")
 
         if not auth_header.startswith("Bearer "):
-            # Нет токена - анонимный пользователь
             return None
 
         token = auth_header.split(" ")[1]
 
         try:
-            # Верифицируем токен
             secret_key = getattr(settings, "JWT_SECRET_KEY", settings.SECRET_KEY)
             algorithm = getattr(settings, "JWT_ALGORITHM", "HS256")
 
@@ -38,10 +35,8 @@ class JWTAuthentication(BaseAuthentication):
             if payload.get("type") != "access":
                 raise AuthenticationFailed("Invalid token type. Access token required.")
 
-            # Получаем пользователя
             user = User.objects.get(id=payload["user_id"], is_active=True)
 
-            # Обновляем время последнего входа
             user.last_login = timezone.now()
             user.save(update_fields=["last_login"])
 

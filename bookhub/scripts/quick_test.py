@@ -17,8 +17,6 @@ def quick_test():
     """
     print("Быстрый тест BookHub")
     print("=" * 40)
-
-    # 1. Проверка сервера
     print("1. Проверка сервера...")
     try:
         response = requests.get(f"{BASE_URL}/", timeout=3)
@@ -29,12 +27,10 @@ def quick_test():
         print("Запустите: python manage.py runserver")
         return
 
-    # 2. Проверка публичного API
     print("\n2. Проверка публичного API...")
     response = requests.get(f"{BASE_URL}/api/products/")
     print(f"   GET /api/products/: {response.status_code}")
 
-    # 3. Проверка аутентификации
     print("\n3. Проверка аутентификации...")
 
     try:

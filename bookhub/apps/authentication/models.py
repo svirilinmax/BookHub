@@ -101,10 +101,8 @@ class AuthToken(BaseModel):
         """
         import bcrypt
 
-        # Генерируем случайный refresh token
         raw_token = str(uuid.uuid4()) + str(uuid.uuid4())
 
-        # Хешируем для хранения в БД
         salt = bcrypt.gensalt()
         hashed_token = bcrypt.hashpw(raw_token.encode("utf-8"), salt)
 
@@ -127,7 +125,6 @@ class AuthToken(BaseModel):
         """
         import bcrypt
 
-        # Ищем активные refresh токены пользователя
         refresh_tokens = cls.objects.filter(
             user=user,
             token_type="refresh",

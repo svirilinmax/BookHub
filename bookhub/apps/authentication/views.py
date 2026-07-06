@@ -37,7 +37,6 @@ class RegisterView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
 
-        # Создаем токен подтверждения
         verification_token = str(uuid.uuid4())
         expires_at = timezone.now() + timezone.timedelta(hours=24)
 
@@ -58,7 +57,6 @@ class RegisterView(generics.CreateAPIView):
             token_type="access", lifetime=timezone.timedelta(minutes=30)
         )
 
-        # Создаем refresh токен
         refresh_token_obj, raw_refresh_token = AuthToken.create_refresh_token(
             user=user,
             ip=request.META.get("REMOTE_ADDR"),
@@ -99,7 +97,6 @@ class LoginView(APIView):
         ip_address = request.META.get("REMOTE_ADDR")
         user_agent = request.META.get("HTTP_USER_AGENT", "")
 
-        # Проверяем защиту от брутфорса
         if LoginAttempt.is_ip_blocked(ip_address):
             LoginAttempt.objects.create(
                 email=serializer.validated_data["email"],
@@ -113,7 +110,6 @@ class LoginView(APIView):
                 status=status.HTTP_429_TOO_MANY_REQUESTS,
             )
 
-        # Создаем запись о попытке входа
         login_attempt = LoginAttempt.objects.create(
             email=serializer.validated_data["email"],
             ip_address=ip_address,
@@ -121,17 +117,14 @@ class LoginView(APIView):
             success=True,
         )
 
-        # Создаем access токен
         access_token = user.create_jwt_token(
             token_type="access", lifetime=timezone.timedelta(minutes=30)
         )
 
-        # Создаем refresh токен
         refresh_token_obj, raw_refresh_token = AuthToken.create_refresh_token(
             user=user, ip=ip_address, user_agent=user_agent
         )
 
-        # Обновляем last_login
         user.last_login = timezone.now()
         user.save(update_fields=["last_login"])
 
@@ -160,12 +153,8 @@ class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        # Добавляем все токены пользователя в черный список
         AuthToken.blacklist_user_tokens(request.user)
-
-        # Очищаем кеш сессий
         cache.delete_pattern(f"session_{request.user.id}_*")
-
         return Response({"message": "Successfully logged out"})
 
 
@@ -178,14 +167,12 @@ class RefreshTokenView(APIView):
 
     def post(self, request):
         refresh_token = request.data.get("refresh")
-
         if not refresh_token:
             return Response(
                 {"error": "Refresh token is required"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Ищем валидный refresh токен
         for token_obj in AuthToken.objects.filter(
             token_type="refresh", is_blacklisted=False, expires_at__gt=timezone.now()
         ):
@@ -194,16 +181,12 @@ class RefreshTokenView(APIView):
             if bcrypt.checkpw(
                 refresh_token.encode("utf-8"), token_obj.token.encode("utf-8")
             ):
-                # Нашли валидный токен, создаем новый access токен
                 new_access_token = token_obj.user.create_jwt_token(
                     token_type="access", lifetime=timezone.timedelta(minutes=30)
                 )
-
-                # Помечаем старый refresh токен как использованный
                 token_obj.is_blacklisted = True
                 token_obj.save()
 
-                # Создаем новый refresh токен
                 (
                     new_refresh_token_obj,
                     raw_refresh_token,
@@ -233,17 +216,12 @@ class ChangePasswordView(APIView):
     def post(self, request):
         serializer = ChangePasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
         user = request.user
-
-        # Проверяем старый пароль
         if not user.check_password(serializer.validated_data["old_password"]):
             return Response(
                 {"error": "Current password is incorrect"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
-        # Устанавливаем новый пароль
         user.set_password(serializer.validated_data["new_password"])
         user.save()
 
@@ -277,7 +255,6 @@ class ResetPasswordView(APIView):
                 }
             )
 
-        # Создаем токен сброса пароля
         reset_token = str(uuid.uuid4())
         expires_at = timezone.now() + timezone.timedelta(hours=1)
 
@@ -317,21 +294,15 @@ class ConfirmResetPasswordView(APIView):
         new_password = serializer.validated_data["new_password"]
 
         try:
-            # Ищем валидный токен
             reset_token = PasswordResetToken.objects.get(
                 token=token, is_used=False, expires_at__gt=timezone.now()
             )
 
-            # Помечаем как использованный
             reset_token.is_used = True
             reset_token.save()
-
-            # Устанавливаем новый пароль
             user = reset_token.user
             user.set_password(new_password)
             user.save()
-
-            # Инвалидируем все существующие токены пользователя
             AuthToken.blacklist_user_tokens(user)
 
             return Response(
@@ -365,16 +336,12 @@ class VerifyEmailView(APIView):
             )
 
         try:
-            # Ищем валидный токен
             verification_token = EmailVerificationToken.objects.get(
                 token=token, is_used=False, expires_at__gt=timezone.now()
             )
-
-            # Помечаем как использованный
             verification_token.is_used = True
             verification_token.save()
 
-            # Активируем пользователя
             user = verification_token.user
             user.is_verified = True
             user.save()

@@ -38,12 +38,9 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    # Корневой URL
     path("", api_root, name="api-root"),
-    # Админ
     path("admin/", admin.site.urls),
     path("api/admin/permissions/", include("apps.authorization.urls")),
-    # Документация API
     path(
         "swagger/",
         schema_view.with_ui("swagger", cache_timeout=0),

@@ -36,6 +36,7 @@ setup.bat
 
 #### Для Linux/Mac:
 ```bash
+
 # Дайте права на выполнение и запустите
 chmod +x setup.sh
 ./setup.sh
